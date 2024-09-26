@@ -7,19 +7,23 @@ A wrapper around the Perplexity WebUI using Langchain. Under the hood, relies on
 ## Usage
 
 ```python
-import asyncio
-import perplexity_webui
+from perplexity_webui_langchain import PerplexityWebUIChatModel
+from langchain_core.messages import HumanMessage
 
-llm = perplexity_webui.PerplexityWebUILLM(email="peteras4@illinois.edu")
+import asyncio
+
+llm = PerplexityWebUIChatModel(email="peteras4@illinois.edu")
 
 async def main():
-    res = await llm.ainvoke("What is the capital of Illinois?")
-    print(res)
-    async for token in llm.astream("hello"):
-        print(token, end="|", flush=True)
+    msg = await llm.ainvoke([
+        HumanMessage(content="What is the capital of Illinois?"),
+    ])
+    print(msg.content)
+    async for msg in llm.astream("hello"):
+        print(msg.content, end="|", flush=True)
 
-    async for token in llm.astream("what was my last message?", followup=True):
-        print(token, end="|", flush=True)
+    async for msg in llm.astream("what was my last message?", followup=True):
+        print(msg.content, end="|", flush=True)
 if __name__ == "__main__":
     asyncio.run(main())
 ```

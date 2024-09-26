@@ -1,1 +1,1 @@
-from .perplexity_webui import PerplexityWebUILLM
+from .perplexity_webui import PerplexityWebUIChatModel
