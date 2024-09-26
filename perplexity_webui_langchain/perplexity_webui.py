@@ -12,7 +12,9 @@ class PerplexityWebUILLM(LLM):
     """
     email: str
     backend_uuid: Optional[str] = None
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, email, *args: Any, backend_uuid=None, **kwargs: Any) -> None:
+    	self.email = email
+	self.backend_uuid = backend_uuid
         super().__init__(*args, **kwargs)
 
 
