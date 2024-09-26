@@ -130,7 +130,6 @@ class PerplexityWebUIChatModel(BaseChatModel):
                     messages = hashable_messages[j:]
                     followup = True
                     break
-                else:
                 j -= 1
             
             # Only add new messages to the conversation.
