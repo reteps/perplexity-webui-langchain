@@ -1,2 +1,2 @@
-git+https://github.com/dgrieser/perplexityai.git
+git+https://github.com/reteps/perplexityai.git
 langchain

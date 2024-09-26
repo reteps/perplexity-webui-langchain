@@ -12,6 +12,7 @@ class PerplexityWebUILLM(LLM):
     The email associated with the Perplexity account.
     """
     email: str
+    backend_uuid: Optional[str] = None
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
@@ -21,6 +22,7 @@ class PerplexityWebUILLM(LLM):
         prompt: str,
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
+        followup: bool = False,
         **kwargs: Any,
     ) -> str:
         """
@@ -28,10 +30,11 @@ class PerplexityWebUILLM(LLM):
         """
         perplexity = Perplexity(self.email)
         try:
-            answer = perplexity.search_sync(prompt)
-            if 'error' in answer:
-                return answer['error']
-            body = json.loads(answer['text'])
+            resp = perplexity.search_sync(prompt, backend_uuid=self.backend_uuid if followup else None, timeout=None, **kwargs)
+            self.backend_uuid = resp['backend_uuid']
+            if 'error' in resp:
+                return resp['error']
+            body = resp['text']
             # Provide the answer to the user.
             text = body['answer']
             # Provide the links to the user with minimal formatting.
@@ -51,6 +54,7 @@ class PerplexityWebUILLM(LLM):
         prompt: str,
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
+        followup: bool = False, 
         **kwargs: Any,
     ) -> Iterator[GenerationChunk]:
         """
@@ -58,14 +62,14 @@ class PerplexityWebUILLM(LLM):
         """
         perplexity = Perplexity(self.email)
         try:
-            streamed_resp = perplexity.search(prompt)
+            streamed_resp = perplexity.search(prompt, backend_uuid=self.backend_uuid if followup else None, timeout=None, **kwargs)
             for resp in streamed_resp:
-                if 'chunks' in resp:
-                    if len(resp['chunks']) == 0:
-                        continue
-                    chunk = resp['chunks'][-1]
-                else:
-                    chunk = json.loads(resp['text'])['chunks'][-1]
+                self.backend_uuid = resp['backend_uuid']
+                chunks = resp['text']['chunks']
+                if len(chunks) == 0:
+                    continue
+                
+                chunk = chunks[-1]
                 gen_chunk = GenerationChunk(text=chunk)
                 if run_manager:
                     run_manager.on_llm_new_token(gen_chunk.text, chunk=gen_chunk)
