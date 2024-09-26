@@ -11,5 +11,8 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/reteps/perplexity-webui-langchain",
     packages=find_packages(),
-    install_requires=["perplexityai@git+https://github.com/reteps/perplexityai.git", "langchain"],
+    install_requires=[
+        "perplexityai@git+https://github.com/reteps/perplexityai.git",
+        "langchain",
+    ],
 )

@@ -2,3 +2,4 @@
 __pycache__
 perplexity_webui_langchain.egg-info/
 build
+.perplexity_files_url
