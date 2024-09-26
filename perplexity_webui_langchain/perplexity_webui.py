@@ -13,7 +13,6 @@ print("loaded2")
 def aider_hash_filter(x):
     # Ignore the hash of any AI message.
     if type(x) is AIMessage:
-        print('ignoring', x)
         return False
 
     # Ignore the hash of any message that contains the string 'I am not sharing any files that you can edit yet.'
@@ -26,7 +25,6 @@ def aider_hash_filter(x):
         text = x.content
     
     if 'I am not sharing any files that you can edit yet.' in text:
-        print('ignoring', x)
         return False
 
     return True
@@ -54,7 +52,6 @@ class PerplexityWebUIChatModel(BaseChatModel):
         Call the Perplexity API.
         """
         messages = self._convert_input(input_).to_messages()
-        print("start_generate")
         print(messages)
         perplexity = Perplexity(self.email)
         last_message = messages[-1]
@@ -113,7 +110,6 @@ class PerplexityWebUIChatModel(BaseChatModel):
         messages = self._convert_input(input_).to_messages()
         perplexity = Perplexity(self.email)
         backend_uuid = self.backend_uuid
-        print([str(type(m)) for m in messages])
         try:
             # Before we send everything to Perplexity, check if we can recover a partial message history from the conversation_lookup.
             # If we can, we can continue the conversation from the last message.
@@ -124,10 +120,8 @@ class PerplexityWebUIChatModel(BaseChatModel):
             # If not, we can start a new conversation.
 
             # As a hack
-            print(f'{self.conversation_lookup=}')
             hashable_messages = [m for m in messages if hash_filter(m)]
             j = len(hashable_messages)
-            print(f'{hashable_messages=}')
             while j > 0:
                 m_hash = str(hash(str(hashable_messages[:j])))
                 if m_hash in self.conversation_lookup:
@@ -137,7 +131,6 @@ class PerplexityWebUIChatModel(BaseChatModel):
                     followup = True
                     break
                 else:
-                    print(f'<< Did not find conversation[:{j}] in conversation_lookup: {m_hash}')
                 j -= 1
             
             # Only add new messages to the conversation.
@@ -217,7 +210,6 @@ class PerplexityWebUIChatModel(BaseChatModel):
             # Hash the conversation to store it in the conversation_lookup.
             m_hash = str(hash(str(hashable_messages)))
             self.conversation_lookup[m_hash] = (backend_uuid, attachments)
-            print(f'l[{m_hash}] = ({backend_uuid}, {attachments})')
             self.backend_uuid = backend_uuid
         except Exception as e:
             raise e
